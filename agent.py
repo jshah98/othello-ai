@@ -23,7 +23,6 @@ def opponent(color):
 
 # Method to compute utility value of terminal state
 def compute_utility(board, color):
-
     dark, light = get_score(board)
     if color == 1:
         return dark - light
@@ -31,8 +30,16 @@ def compute_utility(board, color):
 
 # Better heuristic value of board
 def compute_heuristic(board, color): #not implemented, optional
-    #IMPLEMENT
-    return 0 #change this!
+    net = 0
+    if board[0][0] == color:
+        net += 100
+    if board[0][len(board)-1] == color:
+        net += 100
+    if board[len(board)-1][0] == color:
+        net += 100
+    if board[len(board)-1][len(board)-1] == color:
+        net += 100
+    return net + compute_utility(board, color)
 
 ############ MINIMAX ###############################
 def minimax_min_node(board, color, limit, caching = 0):
@@ -90,20 +97,24 @@ def select_move_minimax(board, color, limit, caching = 0):
     return minimax_max_node(board, color, limit, caching)[0]
 
 ############ ALPHA-BETA PRUNING #####################
+def order_moves(board, color, possible_moves):
+    return possible_moves
+
 def alphabeta_min_node(board, color, alpha, beta, limit, caching = 0, ordering = 0):
     if caching and board in cache:
         return cache[board]
     min_util = float('inf')
     best_move = None
     possible_moves = get_possible_moves(board, opponent(color))
-    if ordering:
-        temp = {}
-        for move in possible_moves:
-            x,y = move
-            new_board = play_move(board, opponent(color), x, y)
-            temp[move] = compute_utility(new_board, color)
-        possible_moves = sorted(temp, key=temp.get, reverse=True)
-
+    # if ordering:
+    #     temp = {}
+    #     for move in possible_moves:
+    #         x,y = move
+    #         new_board = play_move(board, opponent(color), x, y)
+    #         temp[move] = compute_utility(new_board, color)
+    #     possible_moves = sorted(temp, key=temp.get, reverse=True)
+    # if ordering:
+    #     possible_moves = order_moves(board, color, possible_moves)
     if len(possible_moves) == 0 or limit == 0:
         return None, compute_utility(board, color)
     for move in possible_moves:
@@ -133,6 +144,8 @@ def alphabeta_max_node(board, color, alpha, beta, limit, caching = 0, ordering =
             new_board = play_move(board, color, x, y)
             temp[move] = compute_utility(new_board, color)
         possible_moves = sorted(temp, key=temp.get, reverse=True)
+    # if ordering:
+    #     possible_moves = order_moves(board, color, possible_moves)
     if len(possible_moves) == 0 or limit == 0:
         return None, compute_utility(board, color)
     for move in possible_moves:
